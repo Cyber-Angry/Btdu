@@ -4,11 +4,11 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
 from user_logger import is_banned, save_user
-from admin import admin_panel, handle_admin_callback   # ✅ sirf yeh 2 import kar
+from admin import admin_panel, handle_admin_callback  # ✅ sirf yeh 2 import kar
 
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-OWNER_ID = int(os.getenv("BOT_OWNER_ID"))
+OWNER_ID = int(os.getenv("BOT_OWNER_ID", "0"))  # Default 0 agar env missing ho
 
 # Load data.json
 with open("data.json", "r", encoding="utf-8") as f:
@@ -27,15 +27,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     username = f"@{user.username}" if user.username else f"{user.first_name or 'User'}"
     entry = f"{username} ({user_id})"
 
-    await update.message.reply_text(DATA["start_text"])
-    await update.message.reply_photo(photo=DATA["scanner_file_id"])
+    if update.message:  # ✅ ensure update.message exists
+        if "start_text" in DATA:
+            await update.message.reply_text(DATA["start_text"])
+        if "scanner_file_id" in DATA:
+            await update.message.reply_photo(photo=DATA["scanner_file_id"])
 
 
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id == OWNER_ID:
         await admin_panel(update, context)
     else:
-        await update.message.reply_text("🚫 You are not authorized to use this command.")
+        if update.message:
+            await update.message.reply_text("🚫 You are not authorized to use this command.")
 
 
 def main():
