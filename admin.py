@@ -111,6 +111,7 @@ async def handle_admin_callback(update: Update, context: ContextTypes.DEFAULT_TY
             return
 
         with open(USERS_FILE, "rb") as f:
-            await query.message.reply_document(
-                document=InputFile(f, filename="users_list.txt"),
-                caption="📂 All registered users list"
+    await query.message.reply_document(
+        document=InputFile(f, filename="users_list.txt"),
+        caption="📂 All registered users list"
+    )
